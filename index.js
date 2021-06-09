@@ -2,6 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const fileUpload = require("express-fileupload");
 const axios = require("axios");
+const fs1 = require("fs");
+
 const fs = require("fs").promises;
 const path = require("path");
 const { getVideoDurationInSeconds } = require('get-video-duration')
@@ -20,25 +22,33 @@ app.use(
 // client uploads a file
 app.post("/upload", function (req, res) {
   console.log("upload:");
-  const fileName = Object.keys(req.files)[0];
-  const myVideo = req.files[fileName];
-  const videoPath = `${__dirname}/videos/${myVideo.name}`
-  myVideo
-    .mv(videoPath, async (err) => {
-      console.log("promise: " + myVideo.name);
-      if (err) {
-        console.error(err.message);
-        res.sendStatus(500);
-      } else {
-        // TODO: API call to Neta -
-        const data = await axios.post("http://10.10.248.106:5000/prediction", {
-          videoPath: `videos/${myVideo.name}`
-        });
-        console.log(data);
-        // res.status(200).send(data);
-        res.sendStatus(200);
-      }
-    });
+  const decodedFileName = decodeURI(req.params.fileName);
+  const fileNameWithoutExt = path.parse(decodedFileName).name;
+  const jsonfilepath = `${__dirname}/censored/${fileNameWithoutExt}.json`
+
+  if (!fs1.existsSync(jsonfilepath)) {
+    const fileName = Object.keys(req.files)[0];
+    const myVideo = req.files[fileName];
+    const videoPath = `${__dirname}/videos/${myVideo.name}`
+    myVideo
+      .mv(videoPath, async (err) => {
+        console.log("promise: " + myVideo.name);
+        if (err) {
+          console.error(err.message);
+          res.sendStatus(500);
+        } else {
+          // TODO: API call to Neta -
+          const data = await axios.post("http://10.10.248.106:5000/prediction", {
+            videoPath: `videos/${myVideo.name}`
+          });
+          console.log(data);
+          // res.status(200).send(data);
+          res.sendStatus(200);
+        }
+      });
+    } else {
+      res.sendStatus(200);
+    }
 });
 
 // body , content
