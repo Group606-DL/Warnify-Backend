@@ -30,12 +30,13 @@ app.post("/upload", function (req, res) {
         console.error(err.message);
         res.sendStatus(500);
       } else {
-        res.sendStatus(200);
         // TODO: API call to Neta -
-        // const data = await axios.post("http://localhost:8080/NetaTODORoute", {
-        //   videoPath
-        // });
-        // console.log(`data: ${data}`);
+        const data = await axios.post("http://10.10.248.106:5000/prediction", {
+          videoPath: `videos/${myVideo.name}`
+        });
+        console.log(data);
+        // res.status(200).send(data);
+        res.sendStatus(200);
       }
     });
 });
@@ -46,13 +47,16 @@ app.post("/upload", function (req, res) {
 //  ....
 // }, videoname.mp4 ->  will be saved as videoname.mp4.txt
 app.post("/censored", async function (req, res) {
+  console.log('got censored req');
+  console.log(req.body);
   await fs.writeFile(`${__dirname}/censored/${req.body.name}.txt`, req.body.content);
   res.sendStatus(200);
 });
 
 // GET censored files names
 app.get("/videos/names", async function (req, res) {
-  const videoFiles = await fs.readdir(`${__dirname}/videos`);
+  const videoFiles = await (await fs.readdir(`${__dirname}/videos`)).filter(
+      file=> {return path.extname(file).toLowerCase() ==='.mp4'});
   const censoredInfoFiles = await fs.readdir(`${__dirname}/censored`);
   
   let durationsPromises = videoFiles.map(file => {
