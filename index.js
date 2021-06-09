@@ -47,9 +47,9 @@ app.post("/upload", function (req, res) {
 //  ....
 // }, videoname.mp4 ->  will be saved as videoname.mp4.txt
 app.post("/censored", async function (req, res) {
-  console.log('got censored req');
-  console.log(req.body);
-  await fs.writeFile(`${__dirname}/censored/${req.body.name}.txt`, req.body.content);
+  const fileNameWithoutExt = path.parse(req.body.name).name;
+  
+  await fs.writeFile(`${__dirname}/censored/${fileNameWithoutExt}.json`, req.body.content);
   res.sendStatus(200);
 });
 
