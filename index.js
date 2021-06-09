@@ -41,15 +41,13 @@ app.post("/upload", function (req, res) {
     });
 });
 
-// Neta should send here the the json
 // body , content
 // example: {
 //  ....
 // }, videoname.mp4 ->  will be saved as videoname.mp4.txt
 app.post("/censored", async function (req, res) {
-  const fileNameWithoutExt = path.parse(req.body.name).name;
-  
-  await fs.writeFile(`${__dirname}/censored/${fileNameWithoutExt}.json`, req.body.content);
+  console.log(`got new prediction for filename ${req.body.name}`);
+  await fs.writeFile(`${__dirname}/censored/${req.body.name}.json`, JSON.stringify(req.body.content));
   res.sendStatus(200);
 });
 
